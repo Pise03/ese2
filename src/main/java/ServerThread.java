@@ -9,8 +9,9 @@ public class ServerThread extends Thread {
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
 
-    public ServerThread(Socket socket) {
+    public ServerThread(Socket socket, ServerSocket server) {
         this.client = socket;
+        this.server = server;
     }
 
     public void run() {
@@ -21,20 +22,18 @@ public class ServerThread extends Thread {
         }
     }
 
-
     public void comunica() throws Exception {
 
         inDalClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
         outVersoClient = new DataOutputStream(client.getOutputStream());
 
-        for(;;){
+        for (;;) {
             stringaRicevuta = inDalClient.readLine();
-            if(stringaRicevuta == null || stringaRicevuta.equals("FINE")){
+            if (stringaRicevuta == null || stringaRicevuta.equals("FINE") || stringaRicevuta.equals("STOP")) {
                 outVersoClient.writeBytes(stringaRicevuta + "(=>server in chiusura ...)" + '\n');
-                System.out.println("6 Echo sul server in chiusura :"+ stringaRicevuta);
+                System.out.println("6 Echo sul server in chiusura :" + stringaRicevuta);
                 break;
-            }
-            else{
+            } else {
                 outVersoClient.writeBytes(stringaRicevuta + " (ricevuta e ritrasmessa)" + '\n');
                 System.out.println("6 Echo sul server :" + stringaRicevuta);
             }
@@ -44,5 +43,9 @@ public class ServerThread extends Thread {
         System.out.println("9 chiusura socket" + client);
         client.close();
 
-}
+        if (stringaRicevuta.equals("STOP")) {
+            server.close();
+        }
+
+    }
 }

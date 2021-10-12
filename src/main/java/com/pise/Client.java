@@ -49,7 +49,7 @@ public class Client {
                 stringaRicevutaDalServer = inDalServer.readLine();
                 System.out.println("7 ... risposta dal server" + '\n' + stringaRicevutaDalServer);
 
-                if (stringaUtente.equals("FINE")) {
+                if (stringaUtente.equals("FINE") || stringaUtente.equals("STOP")) {
                     System.out.println("8 CLIENT: termina elaborazione e chiude connessione");
                     miosocket.close();
                     break;
