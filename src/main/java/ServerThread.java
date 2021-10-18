@@ -9,9 +9,12 @@ public class ServerThread extends Thread {
     BufferedReader inDalClient;
     DataOutputStream outVersoClient;
 
-    public ServerThread(Socket socket, ServerSocket server) {
+    ServerListener listening = new ServerListener();
+
+    public ServerThread(Socket socket, ServerSocket server, ServerListener listen) {
         this.client = socket;
         this.server = server;
+        this.listening = listen;
     }
 
     public void run() {
@@ -27,11 +30,19 @@ public class ServerThread extends Thread {
         inDalClient = new BufferedReader(new InputStreamReader(client.getInputStream()));
         outVersoClient = new DataOutputStream(client.getOutputStream());
 
+        listening.addClient(client);
+
         for (;;) {
             stringaRicevuta = inDalClient.readLine();
-            if (stringaRicevuta == null || stringaRicevuta.equals("FINE") || stringaRicevuta.equals("STOP")) {
+            if (stringaRicevuta == null || stringaRicevuta.equals("FINE")) {
                 outVersoClient.writeBytes(stringaRicevuta + "(=>server in chiusura ...)" + '\n');
                 System.out.println("6 Echo sul server in chiusura :" + stringaRicevuta);
+                break;
+            } else if(stringaRicevuta.equals("STOP")) { //controllo sulla stringa STOP
+                outVersoClient.writeBytes(stringaRicevuta + "(=>server in chiusura ...)" + '\n');
+                System.out.println("6 Echo sul server in chiusura :" + stringaRicevuta);
+                //parte il thread che spegne tutti i client
+                listening.start();
                 break;
             } else {
                 outVersoClient.writeBytes(stringaRicevuta + " (ricevuta e ritrasmessa)" + '\n');
@@ -44,6 +55,7 @@ public class ServerThread extends Thread {
         client.close();
 
         if (stringaRicevuta.equals("STOP")) {
+            System.out.println("10 chiusura SERVER: " +  server);
             server.close();
         }
 

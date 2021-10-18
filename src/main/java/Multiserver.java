@@ -5,11 +5,14 @@ public class Multiserver {
     public void start(){
     try {
         ServerSocket serverSocket = new ServerSocket(6789);
+
+        ServerListener listen = new ServerListener();
+        
         for(;;){
             System.out.println("1 Server in attesa ...");
             Socket socket = serverSocket.accept();
             System.out.println("3 Server socket " + socket);
-            ServerThread serverThread = new ServerThread(socket, serverSocket);
+            ServerThread serverThread = new ServerThread(socket, serverSocket, listen);
             serverThread.start();
         }        
     } catch (Exception e) {
